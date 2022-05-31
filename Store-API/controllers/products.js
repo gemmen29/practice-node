@@ -8,7 +8,7 @@ const getAllProductsTesting = async (req, res) => {
 };
 
 const getAllProducts = async (req, res) => {
-  const { featured, company, name } = req.query;
+  const { featured, company, name, sort } = req.query;
 
   const queryObject = {};
 
@@ -24,7 +24,13 @@ const getAllProducts = async (req, res) => {
     queryObject.name = { $regex: name, $options: 'i' };
   }
 
-  const products = await Product.find(queryObject);
+  let result = Product.find(queryObject);
+  if (sort) {
+    const sortList = sort.split(',').join(' ');
+    result = result.sort(sortList);
+  }
+
+  const products = await result;
   res.status(200).json({ nbHits: products.length, products });
 };
 
