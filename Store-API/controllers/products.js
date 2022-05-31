@@ -8,22 +8,41 @@ const getAllProductsTesting = async (req, res) => {
 };
 
 const getAllProducts = async (req, res) => {
-  const { featured, company, name, sort, fields } = req.query;
+  const { featured, company, name, sort, fields, numericFilters } = req.query;
 
   const queryObject = {};
 
   if (featured) {
     queryObject.featured = featured === 'true';
   }
-
   if (company) {
     queryObject.company = company;
   }
-
   if (name) {
     queryObject.name = { $regex: name, $options: 'i' };
   }
-
+  // Numeric Filter
+  if (numericFilters) {
+    const operatorMap = {
+      '>': '$gt',
+      '<': '$lt',
+      '>=': '$gte',
+      '<=': '$lte',
+      '=': '$eq',
+    };
+    const regex = /\b(<|>|>=|<=|=)\b/g;
+    const filters = numericFilters.replace(
+      regex,
+      (match) => `-${operatorMap[match]}-`
+    );
+    const options = ['price', 'rating'];
+    filters.split(',').forEach((filter) => {
+      const [field, operator, value] = filter.split('-');
+      if (options.includes(field)) {
+        queryObject[field] = { [operator]: Number(value) };
+      }
+    });
+  }
   let result = Product.find(queryObject);
   //sort
   if (sort) {
