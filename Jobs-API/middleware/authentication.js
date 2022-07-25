@@ -12,12 +12,12 @@ const auth = async (req, res, next) => {
   try {
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
-    const user = await User.findById(decoded.id);
+    const user = await User.findById(decoded.id).select('-password');
     if (!user) {
       throw new UnauthenticatedError('Invalid token');
     }
 
-    req.user = { name: user.name, userId: user._id, email: user.email };
+    req.user = user;
     next();
   } catch (err) {
     throw new UnauthenticatedError('Authentication invalid');
