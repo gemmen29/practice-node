@@ -22,3 +22,5 @@ const JobSchema = mongoose.Schema({
     required: [true, 'Please provide a user'],
   },
 });
+
+module.exports = mongoose.model('Job', JobSchema);
