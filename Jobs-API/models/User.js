@@ -33,11 +33,15 @@ UserSchema.pre('save', async function () {
 UserSchema.methods.createJWT = function () {
   return jwt.sign(
     { id: this._id, name: this.name, email: this.email },
-    'JWT_SECRET',
+    process.env.JWT_SECRET,
     {
-      expiresIn: '30d',
+      expiresIn: process.env.JWT_LIFETIME,
     }
   );
+};
+
+UserSchema.methods.comparePassword = async function (password) {
+  return await bcrypt.compare(password, this.password);
 };
 
 module.exports = mongoose.model('User', UserSchema);
